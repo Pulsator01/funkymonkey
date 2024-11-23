@@ -1,249 +1,109 @@
-"use client";
+'use client'
+import React, { useState } from 'react';
+import { Wallet, CircleDollarSign, Users, HelpCircle } from 'lucide-react';
 
-import React, { useState } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
-import { Program, AnchorProvider, web3 } from "@project-serum/anchor";
-
-export default function Page() {
-  // State management
-  const [groupName, setGroupName] = useState("");
-  const [memberAddress, setMemberAddress] = useState("");
-  const [expenseAmount, setExpenseAmount] = useState("");
-  const [payerAddress, setPayerAddress] = useState("");
-  const [currentGroup, setCurrentGroup] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const { connection } = useConnection();
-  const wallet = useWallet();
-
-  // Initialize the program
-  const getProgram = () => {
-    if (!wallet.connected) return null;
-    const provider = new AnchorProvider(connection, wallet, {});
-    const programId = new PublicKey(
-      "ATXoGc1EmZjV7pgwzuHDwy98yHiMeu4SWEMBWyEKc7xi",
-    );
-    return new Program(idl, programId, provider);
-  };
-
-  const initializeGroup = async (e) => {
-    e.preventDefault();
-    if (!wallet.connected) {
-      setError("Please connect your wallet first");
-      return;
-    }
-    // random comment
-    setLoading(true);
-    try {
-      const program = getProgram();
-      const [groupPDA] = await PublicKey.findProgramAddress(
-        [Buffer.from("group"), wallet.publicKey.toBuffer()],
-        program.programId,
-      );
-
-      await program.methods
-        .initialize(groupName)
-        .accounts({
-          group: groupPDA,
-          owner: wallet.publicKey,
-          systemProgram: web3.SystemProgram.programId,
-        })
-        .rpc();
-
-      setGroupName("");
-      setCurrentGroup({
-        publicKey: groupPDA,
-        name: groupName,
-        members: [],
-        balances: [],
-      });
-    } catch (err) {
-      setError(`Failed to create group: ${err.message}`);
-    }
-    setLoading(false);
-  };
-
-  const addMember = async (e) => {
-    e.preventDefault();
-    if (!currentGroup || !memberAddress) return;
-
-    setLoading(true);
-    try {
-      const program = getProgram();
-      const memberPubkey = new PublicKey(memberAddress);
-
-      await program.methods
-        .addMember(memberPubkey)
-        .accounts({
-          group: currentGroup.publicKey,
-          owner: wallet.publicKey,
-        })
-        .rpc();
-
-      setMemberAddress("");
-      setCurrentGroup((prev) => ({
-        ...prev,
-        members: [...prev.members, memberPubkey],
-      }));
-    } catch (err) {
-      setError(`Failed to add member: ${err.message}`);
-    }
-    setLoading(false);
-  };
-
-  const addExpense = async (e) => {
-    e.preventDefault();
-    if (!currentGroup || !expenseAmount || !payerAddress) return;
-
-    setLoading(true);
-    try {
-      const program = getProgram();
-      const payerPubkey = new PublicKey(payerAddress);
-      const amount = new web3.BN(
-        parseFloat(expenseAmount) * web3.LAMPORTS_PER_SOL,
-      );
-
-      await program.methods
-        .addExpense(amount, payerPubkey)
-        .accounts({
-          group: currentGroup.publicKey,
-          owner: wallet.publicKey,
-        })
-        .rpc();
-
-      setExpenseAmount("");
-      setPayerAddress("");
-      const groupAccount = await program.account.group.fetch(
-        currentGroup.publicKey,
-      );
-      setCurrentGroup((prev) => ({
-        ...prev,
-        ...groupAccount,
-      }));
-    } catch (err) {
-      setError(`Failed to add expense: ${err.message}`);
-    }
-    setLoading(false);
-  };
-
+const HomePage = () => {
+  const [expenseAmount, setExpenseAmount] = useState('45.23');
+  const [splitAddress, setSplitAddress] = useState('');
+  
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Error Display */}
-        {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
-            <p className="text-red-700">{error}</p>
-          </div>
-        )}
-
-        {/* Create Group Form */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Create New Group</h2>
-          <form onSubmit={initializeGroup} className="space-y-4">
-            <input
-              type="text"
-              placeholder="Group Name"
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              className="w-full p-2 border rounded"
-            />
-            <button
-              type="submit"
-              disabled={loading || !wallet.connected}
-              className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-300"
-            >
-              Create Group
-            </button>
-          </form>
+    <div className="min-h-screen bg-white p-8">
+      {/* Header */}
+      <header className="max-w-6xl mx-auto flex justify-between items-center mb-12">
+        <div className="flex items-center space-x-2">
+          <span className="text-purple-600 font-bold text-2xl">Sol</span>
+          <span className="font-bold text-2xl">Split</span>
         </div>
+        
+        <nav className="flex items-center space-x-8">
+          <a href="#" className="text-gray-700">Dashboard</a>
+          <a href="#" className="text-gray-700">Logbook</a>
+          <a href="#" className="text-gray-700">Groups</a>
+          <a href="#" className="text-gray-700">Settle Up</a>
+          <button className="p-2 bg-gray-100 rounded-full">
+            <HelpCircle className="w-5 h-5 text-gray-600" />
+          </button>
+          <div className="w-10 h-10 rounded-full bg-gray-200" />
+        </nav>
+      </header>
 
-        {/* Group Management */}
-        {currentGroup && (
-          <>
-            {/* Add Member Form */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4">Add Member</h2>
-              <form onSubmit={addMember} className="space-y-4">
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto flex gap-8">
+        {/* Left Column - Expense Form */}
+        <div className="flex-1">
+          <h1 className="text-3xl font-semibold mb-2">Good morning, Adicheeky</h1>
+          <p className="text-gray-500 mb-8">11 September, 2024</p>
+          
+          <div className="bg-white rounded-xl p-6 shadow-sm border">
+            <div className="mb-8">
+              <label className="block text-sm text-gray-500 mb-2">Expense Amount</label>
+              <div className="flex items-center">
                 <input
                   type="text"
-                  placeholder="Member Wallet Address"
-                  value={memberAddress}
-                  onChange={(e) => setMemberAddress(e.target.value)}
-                  className="w-full p-2 border rounded"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 disabled:bg-gray-300"
-                >
-                  Add Member
-                </button>
-              </form>
-            </div>
-
-            {/* Add Expense Form */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4">Add Expense</h2>
-              <form onSubmit={addExpense} className="space-y-4">
-                <input
-                  type="number"
-                  step="0.000000001"
-                  placeholder="Amount in SOL"
                   value={expenseAmount}
                   onChange={(e) => setExpenseAmount(e.target.value)}
-                  className="w-full p-2 border rounded"
+                  className="text-4xl font-semibold w-48 focus:outline-none"
                 />
-                <input
-                  type="text"
-                  placeholder="Payer Wallet Address"
-                  value={payerAddress}
-                  onChange={(e) => setPayerAddress(e.target.value)}
-                  className="w-full p-2 border rounded"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-purple-500 text-white p-2 rounded hover:bg-purple-600 disabled:bg-gray-300"
-                >
-                  Add Expense
+                <span className="text-4xl font-semibold ml-2">Sol</span>
+                <button className="ml-auto p-2 text-gray-400 hover:text-gray-600">
+                  <Wallet className="w-6 h-6" />
                 </button>
-              </form>
-            </div>
-
-            {/* Group Details */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4">Group Details</h2>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium mb-2">Members</h3>
-                  <ul className="list-disc pl-6 space-y-1">
-                    {currentGroup.members?.map((member, index) => (
-                      <li key={index} className="text-sm text-gray-600">
-                        {member.toString()}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-medium mb-2">Balances</h3>
-                  <ul className="list-disc pl-6 space-y-1">
-                    {currentGroup.balances?.map((balance, index) => (
-                      <li key={index} className="text-sm text-gray-600">
-                        {balance.payer.toString()} owes{" "}
-                        {balance.payee.toString()}{" "}
-                        {(balance.amount / web3.LAMPORTS_PER_SOL).toFixed(9)}{" "}
-                        SOL
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               </div>
             </div>
-          </>
-        )}
-      </div>
+
+            <div className="mb-8">
+              <label className="block text-sm text-gray-500 mb-2">Expense Description</label>
+              <div className="space-y-3">
+                <div className="flex items-center border rounded-lg p-3">
+                  <input
+                    type="text"
+                    placeholder="Wallet Address 1"
+                    value={splitAddress}
+                    onChange={(e) => setSplitAddress(e.target.value)}
+                    className="flex-1 focus:outline-none"
+                  />
+                  <span className="text-gray-400">50%</span>
+                </div>
+                <button className="flex items-center text-gray-400 hover:text-gray-600 p-3">
+                  <span className="mr-2">Add Splitee</span>
+                </button>
+              </div>
+            </div>
+
+            <button className="w-full bg-green-400 text-white rounded-full py-3 flex items-center justify-center">
+              <span className="mr-2">Add Payment</span>
+              <span className="text-2xl">+</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column - Quick Actions */}
+        <div className="w-64 space-y-4">
+          <div className="bg-orange-50 p-6 rounded-xl">
+            <div className="flex items-center mb-4">
+              <CircleDollarSign className="w-6 h-6 text-orange-400" />
+            </div>
+            <h3 className="font-medium mb-1">Open Logbook</h3>
+          </div>
+
+          <div className="bg-blue-50 p-6 rounded-xl">
+            <div className="flex items-center mb-4">
+              <Users className="w-6 h-6 text-blue-400" />
+            </div>
+            <h3 className="font-medium mb-1">Groups</h3>
+          </div>
+
+          <div className="bg-red-50 p-6 rounded-xl">
+            <div className="flex items-center mb-4">
+              <CircleDollarSign className="w-6 h-6 text-red-400" />
+            </div>
+            <h3 className="font-medium mb-1">Settle Up</h3>
+            <p className="text-xl font-semibold">$200.50</p>
+          </div>
+        </div>
+      </main>
     </div>
   );
-}
+};
+
+export default HomePage;

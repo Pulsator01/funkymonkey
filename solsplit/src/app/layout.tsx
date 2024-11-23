@@ -14,6 +14,10 @@ const links: { label: string; path: string }[] = [
   { label: "Account", path: "/account" },
   { label: "Clusters", path: "/clusters" },
   { label: "Basic Program", path: "/basic" },
+  { label: "Dashboard", path: "/" },
+  { label: "Logbook", path: "/logbook" },
+  { label: "Groups", path: "/groups" },
+  { label: "Settle Up", path: "/settle" },
 ];
 
 export default function RootLayout({
