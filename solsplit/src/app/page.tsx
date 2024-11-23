@@ -34,7 +34,7 @@ export default function Page() {
       setError("Please connect your wallet first");
       return;
     }
-
+    // random comment
     setLoading(true);
     try {
       const program = getProgram();
