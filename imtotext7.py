@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 reader = easyocr.Reader(['en'])
 
 # Load the image
-image_path = 't5.png'  # Change this to your image file path
+image_path = 't3.png'  # Change this to your image file path
 image = cv2.imread(image_path)
 
 # Function to preprocess images for model A
