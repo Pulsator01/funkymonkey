@@ -1,0 +1,495 @@
+{
+  "address": "6gUK82V42pHmTu7f3utXbZoiGzx3bZPpfx2HY65k78w7",
+  "metadata": {
+    "name": "solsplit",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "add_expense",
+      "discriminator": [
+        171,
+        23,
+        8,
+        240,
+        62,
+        31,
+        254,
+        144
+      ],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "payer",
+          "type": "pubkey"
+        },
+        {
+          "name": "split_type",
+          "type": {
+            "defined": {
+              "name": "SplitType"
+            }
+          }
+        },
+        {
+          "name": "custom_splits",
+          "type": {
+            "option": {
+              "vec": {
+                "defined": {
+                  "name": "CustomSplit"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "add_member",
+      "discriminator": [
+        13,
+        116,
+        123,
+        130,
+        126,
+        198,
+        57,
+        34
+      ],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "member",
+          "type": "pubkey"
+        },
+        {
+          "name": "nickname",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "delete_expense",
+      "discriminator": [
+        117,
+        203,
+        143,
+        99,
+        175,
+        155,
+        125,
+        144
+      ],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "expense_id",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "group_name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "settle_debt",
+      "discriminator": [
+        133,
+        63,
+        5,
+        255,
+        106,
+        168,
+        238,
+        106
+      ],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "signer",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "payer",
+          "type": "pubkey"
+        },
+        {
+          "name": "payee",
+          "type": "pubkey"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Group",
+      "discriminator": [
+        209,
+        249,
+        208,
+        63,
+        182,
+        89,
+        186,
+        254
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "MemberAlreadyExists",
+      "msg": "Member already exists in the group"
+    },
+    {
+      "code": 6001,
+      "name": "PayerNotGroupMember",
+      "msg": "Payer is not a group member"
+    },
+    {
+      "code": 6002,
+      "name": "CustomSplitsRequired",
+      "msg": "Custom splits are required for this split type"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidSplitAmount",
+      "msg": "Invalid split amount"
+    },
+    {
+      "code": 6004,
+      "name": "CalculationOverflow",
+      "msg": "Calculation overflow"
+    },
+    {
+      "code": 6005,
+      "name": "BalanceNotFound",
+      "msg": "Balance not found"
+    },
+    {
+      "code": 6006,
+      "name": "ExpenseNotFound",
+      "msg": "Expense not found"
+    },
+    {
+      "code": 6007,
+      "name": "ExpenseAlreadyDeleted",
+      "msg": "Expense has already been deleted"
+    },
+    {
+      "code": 6008,
+      "name": "InsufficientBalance",
+      "msg": "Insufficient balance to settle debt"
+    }
+  ],
+  "types": [
+    {
+      "name": "Balance",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "payer",
+            "type": "pubkey"
+          },
+          {
+            "name": "payee",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CustomSplit",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "member",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Expense",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u32"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "payer",
+            "type": "pubkey"
+          },
+          {
+            "name": "splits",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "CustomSplit"
+                }
+              }
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "ExpenseStatus"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ExpenseStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Deleted"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Group",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "members",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "GroupMember"
+                }
+              }
+            }
+          },
+          {
+            "name": "expenses",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "Expense"
+                }
+              }
+            }
+          },
+          {
+            "name": "balances",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "Balance"
+                }
+              }
+            }
+          },
+          {
+            "name": "settlements",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "Settlement"
+                }
+              }
+            }
+          },
+          {
+            "name": "total_expenses",
+            "type": "u64"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GroupMember",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "nickname",
+            "type": "string"
+          },
+          {
+            "name": "joined_at",
+            "type": "i64"
+          },
+          {
+            "name": "total_paid",
+            "type": "u64"
+          },
+          {
+            "name": "total_owed",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Settlement",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "payer",
+            "type": "pubkey"
+          },
+          {
+            "name": "payee",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SplitType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Equal"
+          },
+          {
+            "name": "Custom"
+          },
+          {
+            "name": "Percentage"
+          }
+        ]
+      }
+    }
+  ]
+}
