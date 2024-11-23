@@ -2,6 +2,8 @@ use anchor_lang::prelude::*;
 
 declare_id!("ATXoGc1EmZjV7pgwzuHDwy98yHiMeu4SWEMBWyEKc7xi");
 
+// main program
+
 #[program]
 pub mod solsplit {
     use super::*;
